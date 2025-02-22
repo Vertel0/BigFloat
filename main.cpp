@@ -172,7 +172,9 @@ class big_decimal{
         long long before;
         long long after;
         char sgn = 1;
+        long long actual_after = 0;
         big_decimal(vector<char> v, long long b, long long a, char ssgn){
+            actual_after = a;
             bool flag = 1;
             int counter = 0;
             for(int i = 0; i < b-1; i++){
@@ -210,8 +212,8 @@ class big_decimal{
 
         }
 
-        big_decimal(int b){
-
+        big_decimal(int b, long long aft = 10){
+            actual_after = aft;
             string a;
             if(b == 0){
                 a = "0";
@@ -220,7 +222,7 @@ class big_decimal{
                 a = (char)((b%10) + '0') + a;
                 b/=10;
             }
-            after = 1;
+            after = aft;
             sgn = 1;
             vector<char> dig_int;
             vector<char> dig2_int;
@@ -235,8 +237,11 @@ class big_decimal{
                 i++;
             }
             dig = convert_integer(dig_int);
-            dig.push_back(0);
-            before = dig.size()-1;
+            before = dig.size();
+            for(int i = 0; i < aft; i++){
+                dig.push_back(0);
+            }
+
         }
 
         big_decimal(long double a){
@@ -250,6 +255,7 @@ class big_decimal{
 
 
         big_decimal(string a, long long aft = 10){
+            actual_after = aft;
             after = aft;
             sgn = 1;
             vector<char> dig_int;
@@ -316,11 +322,10 @@ class big_decimal{
         friend bool operator<(const big_decimal &a, const big_decimal &b);
         friend bool operator==(const big_decimal &a, const big_decimal &b);
         friend bool operator!=(const big_decimal &a, const big_decimal &b);
-        friend big_decimal pi(int precision);
+        friend void pi(int precision);
         big_decimal &operator=(const big_decimal &a) = default;
         big_decimal (const big_decimal &other) = default;
         big_decimal ( big_decimal &&other) = default;
-
 };
 
 
@@ -560,6 +565,7 @@ void print(const big_decimal& a){
     }
     cout<<"\n";
 }
+
 
 
 bool operator>(const big_decimal &a, const big_decimal &b){
@@ -859,6 +865,7 @@ big_decimal operator/(const big_decimal& a, const big_decimal& b){
         per_a = aa.before - 1;
     }else if(aa.before >= 0 && aa.dig[0] == 0){
         int i = 1;
+        per_a--;
         while(aa.dig[i] == 0){
             i++;
             per_a--;
@@ -867,20 +874,23 @@ big_decimal operator/(const big_decimal& a, const big_decimal& b){
     if(bb.before > 1){
         per_b = bb.before - 1;
     }else if(bb.before >= 0 && bb.dig[0] == 0){
-
         int i = 1;
+        per_b--;
         while(bb.dig[i] == 0){
             i++;
             per_b--;
         }
     }
     long long del = 0;
-    if(per_b <= 0){
-            del += abs(per_b)+1;
-        for(int i = 0; i < abs(per_b)+1; i++){
-            bb = bb * big_decimal(2);
-        }
-        per_b = 1;
+    aa.before -= per_a;
+    aa.after += per_a;
+    bb.before -= per_b;
+    bb.after += per_b;
+    bb = big_decimal(bb.dig, bb.before, bb.after, bb.sgn);
+    aa = big_decimal(aa.dig, aa.before, aa.after, aa.sgn);
+    if(per_b < 0){
+        del += abs(per_b);
+        per_b = 0;
     }
     long long a_af = aa.after, b_af = bb.after;
     if(a_af < b_af){
@@ -898,6 +908,9 @@ big_decimal operator/(const big_decimal& a, const big_decimal& b){
     if(bef >= 0){
         bef++;
     }else{
+        for(int i = 0; i < abs(bef); i++){
+            res.push_back(0);
+        }
         bef = 1;
     }
     long long k = 0;
@@ -912,10 +925,11 @@ big_decimal operator/(const big_decimal& a, const big_decimal& b){
         temp.push_back(0);
         res.push_back(0);
     }
-
     k = temp.size();
     int kk =0;
-    while(res.size() < 336){
+
+    while(res.size() < max(a.actual_after, b.actual_after) + bef){
+
          if(temp[0] == 0){
             vector<char> t2;
             for(int i = 1; i < temp.size(); i++){
@@ -926,6 +940,7 @@ big_decimal operator/(const big_decimal& a, const big_decimal& b){
         if(div_cmp(temp, bb.dig)){
             res.push_back(1);
             temp = bin_minus(temp, bb.dig);
+
 
             if(k < aa.dig.size()){
                 temp.push_back(aa.dig[k]);
@@ -949,10 +964,11 @@ big_decimal operator/(const big_decimal& a, const big_decimal& b){
         }else{
             rsgn = 0;
         }
-    big_decimal rr(res, max(bef, (long long)1), res.size()-bef, rsgn);
     for(int i = 0; i < del;i++){
-        rr = rr * big_decimal(2);
+        bef++;
     }
+    big_decimal rr(res, bef, res.size()-bef, rsgn);
+
     return rr;
 }
 
@@ -963,35 +979,121 @@ big_decimal abs(const big_decimal& a){
 }
 
 
-big_decimal pi(int precision) {
-    big_decimal pi("0.0", precision);
-    big_decimal sixteen("16.0", precision);
-    big_decimal sixteen_pow("1.0", precision);
-    big_decimal one("1.0", precision);
-    big_decimal two ("2.0", precision);
-    big_decimal four ("4.0", precision);
-    big_decimal five ("5.0", precision);
-    big_decimal six ("6.0", precision);
-    big_decimal eight("8.0", precision);
+void print_pi(const big_decimal& a, int precision){
+
+    if(a.sgn == 0){
+        cout<<"-";
+    }
+    vector<char> dig2_int;
+    vector<char> dig2_frac;
+    for(int i = 0; i < a.before; i++){
+        dig2_int.push_back(a.dig[i]);
+    }
+    for(int i = a.before; i < a.after + a.before; i++){
+        dig2_frac.push_back(a.dig[i]);
+    }
+    vector<char> res{0}, two{2};
+
+    if(dig2_int.size() != 0){
+    if(dig2_int[dig2_int.size()-1] == 1){
+        res[0] = 1;
+    }
+    }
+    for(int i = dig2_int.size() - 2; i >= 0; i--){
+
+        if(dig2_int[i] == 1){
+            res = int_plus(res, two);
+        }
+        for(int j = two.size()-1; j >= 0 ; j--){
+            two[j]*=2;
+        }
+
+        for(int j = two.size()-1; j > 0 ; j--){
+            if(two[j] >= 10){
+                two[j]-=10;
+                two[j-1]++;
+            }
+        }
+
+        if(two[0] >= 10){
+            two[0]-=10;
+            two.push_back(0);
+            for(int j = two.size()-1; j > 0; j--){
+                two[j] = two[j-1];
+            }
+            two[0] = 1;
+        }
+
+    }
+
+    for(int i = 0; i < res.size(); i++){
+       cout<<(int)res[i];
+    }
+
+
+    res = {0}, two = {5};
+
+    for(int i = 0; i < dig2_frac.size(); i++){
+
+        if(dig2_frac[i] == 1){
+            res = frac_plus(res, two);
+        }
+        bool prev_was_bad = 0;
+        for(int j = 0; j < two.size(); j++){
+            if(prev_was_bad){
+                if(two[j] % 2 == 0){
+                   prev_was_bad = 0;
+                }
+                two[j]/=2;
+                two[j]+=5;
+            }else{
+                if(two[j] % 2 == 1){
+                    prev_was_bad = 1;
+                }
+                two[j]/=2;
+            }
+        }
+        if(prev_was_bad){
+            two.push_back(5);
+        }
+    }
+    cout<<".";
+    for(int i = 0; i < precision; i++){
+       cout<<(int)res[i];
+    }
+    cout<<"\n";
+}
+
+
+void pi(int precision) {
+    long long bob = precision * 3.75;
+    big_decimal pi("0.0", bob);
+    big_decimal sixteen("16.0", bob);
+    big_decimal sixteen_pow("1.0", bob);
+    big_decimal one("1.0", bob);
+    big_decimal two ("2.0", bob);
+    big_decimal four ("4.0", bob);
+    big_decimal five ("5.0", bob);
+    big_decimal six ("6.0", bob);
+    big_decimal eight("8.0", bob);
 
     for (int k = 0; k < precision; ++k) {
 
-        big_decimal term1 = four / ((eight * big_decimal(k)) + one);
-        big_decimal term2 = two / ((eight * big_decimal(k)) + four);
-        big_decimal term3 = one / ((eight * big_decimal(k)) + five);
-        big_decimal term4 = one / ((eight * big_decimal(k)) + six);
+        big_decimal term1 = four / ((eight * big_decimal(k, bob)) + one);
+        big_decimal term2 = two / ((eight * big_decimal(k, bob)) + four);
+        big_decimal term3 = one / ((eight * big_decimal(k, bob)) + five);
+        big_decimal term4 = one / ((eight * big_decimal(k, bob)) + six);
         big_decimal term = ((((term1 - term2) - term3) - term4)) / sixteen_pow;
         if(k != precision - 1){
         sixteen_pow = sixteen_pow * sixteen;
         }
         pi = pi + term;
     }
+    print_pi(pi, precision);
 
-
-    return pi;
 }
 
 int main(){
-    big_decimal a = pi(100);
-    print(a);
+    big_decimal a("0.99999", 60), b("1024.00", 60), c("0.96", 60);
+    pi(200);
  }
