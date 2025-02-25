@@ -1,8 +1,10 @@
 #include <iostream>
+#include "main.h"
 #include <vector>
 #include <algorithm>
 #include <string>
 using namespace std;
+
 vector<char> int_plus(const vector<char>& a, const vector<char>& b){
     vector<char> res(max(a.size(), b.size()));
     char as = a.size(), bs = b.size(), m = max(a.size(), b.size());
@@ -165,15 +167,7 @@ vector<char> frac_plus(const vector<char>& a, const vector<char>& b){
     }
 
 
-class big_decimal{
-    private:
-    public:
-        vector <char> dig;
-        long long before;
-        long long after;
-        char sgn = 1;
-        long long actual_after = 0;
-        big_decimal(vector<char> v, long long b, long long a, char ssgn){
+    big_decimal::big_decimal(vector<char> v, long long b, long long a, char ssgn){
             actual_after = a;
             bool flag = 1;
             int counter = 0;
@@ -212,7 +206,7 @@ class big_decimal{
 
         }
 
-        big_decimal(int b, long long aft = 10){
+        big_decimal::big_decimal(int b, long long aft){
             actual_after = aft;
             string a;
             if(b == 0){
@@ -244,7 +238,7 @@ class big_decimal{
 
         }
 
-        big_decimal(long double a){
+        big_decimal::big_decimal(long double a){
             string b = to_string(a);
             big_decimal q(b, 20);
             dig = q.dig;
@@ -254,7 +248,7 @@ class big_decimal{
         }
 
 
-        big_decimal(string a, long long aft = 10){
+        big_decimal::big_decimal(string a, long long aft){
             actual_after = aft;
             after = aft;
             sgn = 1;
@@ -311,23 +305,6 @@ class big_decimal{
             dig = q;
             }
         }
-
-        friend ostream& operator<<(ostream& out, const big_decimal &a);
-        friend big_decimal operator+(const big_decimal &a, const big_decimal &b);
-        friend big_decimal operator*(const big_decimal& a, const big_decimal& b);
-        friend big_decimal operator-(const big_decimal& a, const big_decimal& b);
-        friend big_decimal operator/(const big_decimal& a, const big_decimal& b);
-        friend void print(const big_decimal& a);
-        friend bool operator>(const big_decimal &a, const big_decimal &b);
-        friend bool operator<(const big_decimal &a, const big_decimal &b);
-        friend bool operator==(const big_decimal &a, const big_decimal &b);
-        friend bool operator!=(const big_decimal &a, const big_decimal &b);
-        friend void pi(int precision);
-        big_decimal &operator=(const big_decimal &a) = default;
-        big_decimal (const big_decimal &other) = default;
-        big_decimal ( big_decimal &&other) = default;
-};
-
 
 ostream& operator<<(ostream& out, const big_decimal &a){
     if(a.sgn == 0){
@@ -1066,7 +1043,12 @@ void print_pi(const big_decimal& a, int precision){
 
 
 void pi(int precision) {
-    long long bob = precision * 3.75;
+    long long bob = 0;
+    if(precision > 50){
+        bob = precision * 3.4;
+    }else{
+        bob = precision * 4;
+    }
     big_decimal pi("0.0", bob);
     big_decimal sixteen("16.0", bob);
     big_decimal sixteen_pow("1.0", bob);
@@ -1093,7 +1075,8 @@ void pi(int precision) {
 
 }
 
+
 int main(){
-    big_decimal a("0.99999", 60), b("1024.00", 60), c("0.96", 60);
-    pi(200);
- }
+    pi(100);
+return 0;
+}
