@@ -35,4 +35,6 @@ class big_decimal{
         big_decimal &operator=(const big_decimal &a) = default;
         big_decimal (const big_decimal &other) = default;
         big_decimal ( big_decimal &&other) = default;
+
+        virtual ~big_decimal() = default;
 };
