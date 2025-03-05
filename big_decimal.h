@@ -37,3 +37,5 @@ class big_decimal{
 };
 
 big_decimal operator""_longnum(long double a);
+
+void pi(int precision);

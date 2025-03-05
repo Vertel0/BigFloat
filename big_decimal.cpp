@@ -673,7 +673,19 @@ bool cmp_abs(const big_decimal &a, const big_decimal &b){
 }
 
 
-big_decimal operator-(const big_decimal& a, const big_decimal& b){
+big_decimal operator-(const big_decimal& aa, const big_decimal& bb){
+    big_decimal a = aa, b = bb;
+    if(aa.after > bb.after){
+        for(int i = 0; i < aa.after - bb.after; i++){
+            b.dig.push_back(0);
+            b.after++;
+        }
+    }else{
+        for(int i = 0; i < bb.after - aa.after; i++){
+            a.dig.push_back(0);
+            a.after++;
+        }
+    }
     if(a.sgn == 1 && b.sgn == 0){
         big_decimal b1(b.dig, b.before, b.after, (b.sgn + 1)%2);
         return (a+b1);
@@ -1070,3 +1082,4 @@ void pi(int precision) {
     print_pi(pi, precision);
 
 }
+
