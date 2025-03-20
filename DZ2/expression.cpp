@@ -7,8 +7,14 @@ using namespace std;
 
 int main()
 {
-    map<string, int> m;
-    shared_ptr<Expression<int> > x = make_shared<ConstantExpression<int> >(5);
-    cout<<x->eval(m);
+    map<string, complex<double>> m;
+    m["a"] = 2.0 +3i;
+    m["b"] = 0;
+    string a = "a";
+    shared_ptr< Expression <complex<double>> > expr = make_shared<BinaryExpression<complex<double>> >
+    (make_shared<VariableExpression<complex<double>> >("a"),
+      make_shared<VariableExpression<complex<double>> >("b"),
+      Div);
+    cout<<(expr->eval(m));
     return 0;
 }
