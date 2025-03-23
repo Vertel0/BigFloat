@@ -1,9 +1,12 @@
+#ifndef EXPRESSION_H
+#define EXPRESSION_H
 #include<iostream>
 #include<map>
 #include<memory>
 #include<cmath>
 #include <string>
 #include <sstream>
+#include <complex>
 using namespace std;
 
 class Div_0 : public exception {
@@ -184,14 +187,14 @@ T MonoExpression<T>::eval(map<string, T> &parametrs) {
         case Sin:
             return sin(expr->eval(parametrs));
         case Ln:
-            if (expr->eval(parametrs) <= T(0)) {
-                throw Log_NonPositive();
-            }
+       //     if (expr->eval(parametrs) <= T(0)) {
+       //      throw Log_NonPositive();
+       //     }
             return log(expr->eval(parametrs));
         case Exp:
-            if (expr->eval(parametrs) > T(1000)) { // Примерное значение для проверки
-                throw Exponentiation_Error();
-            }
+         //   if (expr->eval(parametrs) > T(1000)) {
+         //       throw Exponentiation_Error();
+         //   }
             return exp(expr->eval(parametrs));
         default:
             throw Invalid_Function();
@@ -376,3 +379,4 @@ string BinaryExpression<T>::ToString() {
     }
     return "(" + LeftExpr->ToString() + " " + tmp + " " + RightExpr->ToString() + ")";
 }
+#endif
