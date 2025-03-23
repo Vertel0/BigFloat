@@ -1,8 +1,4 @@
 #include "complex_f.h"
-#include "token.h"
-#include "parser.h"
-#include "expression.h"
-
 #include <sstream>
 #include <map>
 using namespace std;
@@ -13,9 +9,10 @@ string formatComplex(complex<double> value) {
     if (value.imag() == 0) {
         oss << value.real();
     } else if (value.real() == 0) {
-        oss << value.imag() << "i";
+        oss <<"(0," << value.imag() << ")";
     } else {
-        oss << value.real() << " + " << value.imag() << "i";
+        oss <<"("<< value.real() << "," << value.imag() << ")";
+
     }
     return oss.str();
 }
@@ -41,9 +38,33 @@ string ParseArguments(int argc, char* argv[]) {
                 return "-1";
             }
             string var = arg.substr(0, eqPos);
-            double value = stod(arg.substr(eqPos + 1));
-            variables[var] = value;
+            string valueStr = arg.substr(eqPos + 1);
+
+            // Парсинг комплексного числа
+            size_t plusPos = valueStr.find('+');
+            size_t minusPos = valueStr.find('-', 1); // Ищем минус, начиная с позиции 1
+            size_t iPos = valueStr.find('i');
+
+            double realPart = 0.0;
+            double imagPart = 0.0;
+
+            if (iPos != string::npos) {
+                if (plusPos != string::npos) {
+                    realPart = stod(valueStr.substr(0, plusPos));
+                    imagPart = stod(valueStr.substr(plusPos + 1, iPos - plusPos - 1));
+                } else if (minusPos != string::npos) {
+                    realPart = stod(valueStr.substr(0, minusPos));
+                    imagPart = stod(valueStr.substr(minusPos, iPos - minusPos));
+                } else {
+                    imagPart = stod(valueStr.substr(0, iPos));
+                }
+            } else {
+                realPart = stod(valueStr);
+            }
+
+            variables[var] = complex<double>(realPart, imagPart);
         }
+
         try {
             auto tokens = tokenize(expression);
             vector<string> varNames;

@@ -8,7 +8,6 @@
 #include "token.h"
 #include "expression.h"
 
-
 template<typename T>
 shared_ptr<Expression<T>> parseExpression(const vector<Token>& tokens, const vector<string>& variables) {
     stack<shared_ptr<Expression<T>>> values;
@@ -17,8 +16,10 @@ shared_ptr<Expression<T>> parseExpression(const vector<Token>& tokens, const vec
     map<string, int> precedence = {
         {"+", 1}, {"-", 1},
         {"*", 2}, {"/", 2},
-        {"^", 3}
+        {"^", 3},
+        {"sin", 4}, {"cos", 4}, {"ln", 4}, {"exp", 4}
     };
+
     for (const auto& token : tokens) {
         if (token.type == NUMBER) {
             T value;
