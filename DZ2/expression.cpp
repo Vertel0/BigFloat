@@ -40,10 +40,8 @@ void parseArguments(int argc, char* argv[]) {
             }
             string var = arg.substr(0, eqPos);
             string valueStr = arg.substr(eqPos + 1);
-
-            // Парсинг комплексного числа
             size_t plusPos = valueStr.find('+');
-            size_t minusPos = valueStr.find('-', 1); // Ищем минус, начиная с позиции 1
+            size_t minusPos = valueStr.find('-', 1);
             size_t iPos = valueStr.find('i');
 
             double realPart = 0.0;
