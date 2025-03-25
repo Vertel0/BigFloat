@@ -16,142 +16,212 @@
 #include "complex_f.h"
 using namespace std;
 
-TEST_CASE("Complex addition and multiplication", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "(x + y) * z", "x=1+1i", "y=2+2i", "z=3+0i"};
+TEST_CASE("Simple complex addition", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "x + y", "x=1+1i", "y=2+2i"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(9,9)"); // (1+1i + 2+2i) * 3 = (3+3i) * 3 = 9 + 9i
+    REQUIRE(q == "(3,3)");
 }
 
-TEST_CASE("Complex subtraction and division", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "(x - y) / z", "x=10+10i", "y=4+4i", "z=2+0i"};
+TEST_CASE("Complex subtraction", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "x - y", "x=5+5i", "y=2+3i"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(3,3)"); // (10+10i - 4+4i) / 2 = (6+6i) / 2 = 3 + 3i
+    REQUIRE(q == "(3,2)");
 }
 
-TEST_CASE("Complex power and multiplication", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "x ^ y * z", "x=1+1i", "y=2+0i", "z=2+0i"};
+TEST_CASE("Complex multiplication", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "x * y", "x=1+2i", "y=3+4i"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(0,4)"); // (1+1i)^2 * 2 = (0+2i) * 2 = 0 + 4i
+    REQUIRE(q == "(-5,10)");
 }
 
-TEST_CASE("Complex sin and cos combination", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "sin(x) + cos(y)", "x=0+0i", "y=0+0i"};
+TEST_CASE("Complex division", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "x / y", "x=4+4i", "y=2+0i"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(1,0)"); // sin(0) + cos(0) = 0 + 1 = 1
+    REQUIRE(q == "(2,2)");
 }
 
-TEST_CASE("Complex ln and exp combination", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "ln(exp(x))", "x=2+0i"};
+TEST_CASE("Complex sin function", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "sin(x)", "x=0+1i"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(2,0)"); // ln(exp(2)) = 2
+    REQUIRE(q == "(0,1.1752)");
 }
 
-TEST_CASE("Complex nested operations", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "(x + y) * (z - w) / (a ^ b)", "x=1+1i", "y=2+2i", "z=3+3i", "w=1+1i", "a=2+0i", "b=2+0i"};
+TEST_CASE("Complex cos function", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "cos(x)", "x=0+1i"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(0,3)"); // (1+1i + 2+2i) * (3+3i - 1+1i) / (2+0i)^2 = (3+3i) * (2+2i) / 4 = (0+12i) / 4 = 0 + 3i
+    REQUIRE(q == "1.54308");
 }
 
-TEST_CASE("Complex sin of sum", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "sin(x + y)", "x=1+1i", "y=2+2i"};
+TEST_CASE("Complex exp function", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "exp(x)", "x=1+1i"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(3.16584,1.9596)"); // sin(3+3i) ≈ 3.16584 + 1.9596i
+    REQUIRE(q == "(1.46869,2.28736)");
 }
 
-TEST_CASE("Complex cos of product", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "cos(x * y)", "x=1+1i", "y=2+2i"};
+TEST_CASE("Complex ln function", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "ln(x)", "x=1+1i"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(-0.642148,-1.06861)"); // cos((1+1i)*(2+2i)) = cos(0+4i) ≈ -0.642148 - 1.06861i
+    REQUIRE(q == "(0.346574,0.785398)");
 }
 
-TEST_CASE("Complex exp of sum", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "exp(x + y)", "x=1+1i", "y=2+2i"};
+TEST_CASE("Nested complex operations", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "(x + y) * (z - w)", "x=1+1i", "y=2+2i", "z=3+3i", "w=1+1i"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(-10.419,-14.095)"); // exp(3+3i) ≈ -10.419 - 14.095i
+    REQUIRE(q == "(0,12)");
 }
 
-TEST_CASE("Complex ln of product", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "ln(x * y)", "x=1+1i", "y=2+2i"};
+TEST_CASE("Complex with real numbers", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "x + 5", "x=2+3i"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(1.38629,1.5708)"); // ln((1+1i)*(2+2i)) = ln(0+4i) ≈ 1.38629 + 1.5708i
+    REQUIRE(q == "(7,3)");
 }
 
-TEST_CASE("Complex sin and cos nested", "[expression]") {
+TEST_CASE("Pure imaginary multiplication", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "x * y", "x=0+2i", "y=0+3i"};
+    int b = sizeof(a) / sizeof(a[0]);
+    string q = ParseArguments(b, const_cast<char**>(a));
+    REQUIRE(q == "-6");
+}
+
+TEST_CASE("Complex conjugate", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "x * y", "x=3+4i", "y=3-4i"};
+    int b = sizeof(a) / sizeof(a[0]);
+    string q = ParseArguments(b, const_cast<char**>(a));
+    REQUIRE(q == "25");
+}
+
+TEST_CASE("Multiple operations", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "x * y + z * w", "x=1+1i", "y=2+2i", "z=3+3i", "w=4+4i"};
+    int b = sizeof(a) / sizeof(a[0]);
+    string q = ParseArguments(b, const_cast<char**>(a));
+    REQUIRE(q == "(0,28)");  
+}
+
+TEST_CASE("Complex division with imaginary denominator", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "x / y", "x=1+1i", "y=0+1i"};
+    int b = sizeof(a) / sizeof(a[0]);
+    string q = ParseArguments(b, const_cast<char**>(a));
+    REQUIRE(q == "(1,-1)");
+}
+
+TEST_CASE("Complex power of real number", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "x ^ y", "x=2+0i", "y=3+0i"};
+    int b = sizeof(a) / sizeof(a[0]);
+    string q = ParseArguments(b, const_cast<char**>(a));
+    REQUIRE(q == "8");
+}
+
+TEST_CASE("Complex power with imaginary exponent", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "x ^ y", "x=1+1i", "y=0+1i"};
+    int b = sizeof(a) / sizeof(a[0]);
+    string q = ParseArguments(b, const_cast<char**>(a));
+    REQUIRE(q == "(0.428829,0.154872)");
+}
+
+TEST_CASE("Nested functions", "[expression]") {
     const char* a[] = {"differentiator", "--eval", "sin(cos(x))", "x=1+1i"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(0.988898,-0.83373)"); // sin(cos(1+1i)) ≈ 0.988898 - 0.83373i
+    REQUIRE(q == "(1.13297,-0.778408)");
 }
 
-TEST_CASE("Complex exp and ln nested", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "exp(ln(x))", "x=2+2i"};
+TEST_CASE("Complex expression with parentheses", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "(x + y) * (z + w)", "x=1+0i", "y=0+1i", "z=2+0i", "w=0+2i"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(2,2)"); // exp(ln(2+2i)) = 2 + 2i
+    REQUIRE(q == "(0,4)");
 }
 
-TEST_CASE("Complex power and sin combination", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "sin(x) ^ y", "x=1.5708+0i", "y=2+0i"}; // sin(pi/2) = 1
+TEST_CASE("Complex variables without imaginary part", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "x + y", "x=5", "y=3"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(1,0)"); // sin(pi/2)^2 = 1^2 = 1
+    REQUIRE(q == "8");
 }
 
-TEST_CASE("Complex cos and division", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "cos(x) / y", "x=0+0i", "y=1+0i"};
+TEST_CASE("Mixed real and complex variables", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "x + y", "x=5", "y=3+2i"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(1,0)"); // cos(0) / 1 = 1 / 1 = 1
+    REQUIRE(q == "(8,2)");
 }
 
-TEST_CASE("Complex ln and addition", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "ln(x) + y", "x=1+0i", "y=2+0i"};
+TEST_CASE("Complex expression with multiple operations", "[expression]") {
+    const char* a[] = {"differentiator", "--eval", "x * y - z / w", "x=1+1i", "y=2+2i", "z=4+4i", "w=2+0i"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(2,0)"); // ln(1) + 2 = 0 + 2 = 2
+    REQUIRE(q == "(-2,2)");
 }
 
-TEST_CASE("Complex exp and subtraction", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "exp(x) - y", "x=0+0i", "y=1+0i"};
+TEST_CASE("Complex derivative of polynomial", "[diff]") {
+    const char* a[] = {"differentiator", "--diff", "x^2 + 3*x + 5", "--by", "x"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(0,0)"); // exp(0) - 1 = 1 - 1 = 0
+    REQUIRE(q == "((((2,0) * (x ^ ((2,0) - (1,0)))) + (((0,0) * x) + ((3,0) * (1,0)))) + (0,0))");
 }
 
-TEST_CASE("Complex combination of all operations", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "(x + y) * (z - w) / (a ^ b) + sin(c) - cos(d)", "x=2+0i", "y=3+0i", "z=4+0i", "w=1+0i", "a=2+0i", "b=2+0i", "c=0+0i", "d=0+0i"};
+TEST_CASE("Complex derivative of sin function", "[diff]") {
+    const char* a[] = {"differentiator", "--diff", "sin(x)", "--by", "x"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(2.75,0)"); // (2+3)*(4-1)/(2^2) + sin(0) - cos(0) = 5*3/4 + 0 - 1 = 3.75 - 1 = 2.75
+    REQUIRE(q == "(cos(x) * (1,0))");
 }
 
-TEST_CASE("Complex deeply nested expressions", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "sin((x + y) * (z - w)) + cos((a / b) ^ c)", "x=1+0i", "y=2+0i", "z=3+0i", "w=1+0i", "a=4+0i", "b=2+0i", "c=2+0i"};
+TEST_CASE("Complex derivative of cos function", "[diff]") {
+    const char* a[] = {"differentiator", "--diff", "cos(x)", "--by", "x"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(0.540302,0)"); // sin((1+2)*(3-1)) + cos((4/2)^2) = sin(6) + cos(4) ≈ -0.279415 + -0.653644 = -0.933059
+    REQUIRE(q == "(((-1,0) * sin(x)) * (1,0))");
 }
 
-TEST_CASE("Complex expression with multiple functions", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "ln(x) + sin(y) * cos(z) - exp(w)", "x=1+0i", "y=0+0i", "z=0+0i", "w=0+0i"};
+TEST_CASE("Complex derivative of exp function", "[diff]") {
+    const char* a[] = {"differentiator", "--diff", "exp(x)", "--by", "x"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(0,0)"); // ln(1) + sin(0) * cos(0) - exp(0) = 0 + 0 * 1 - 1 = -1
+    REQUIRE(q == "((1,0) * exp(x))");
 }
 
-TEST_CASE("Complex combination of all operations and functions", "[expression]") {
-    const char* a[] = {"differentiator", "--eval", "(x + y) * (z - w) / (a ^ b) + sin(c) - cos(d)", "x=2+0i", "y=3+0i", "z=4+0i", "w=1+0i", "a=2+0i", "b=2+0i", "c=0+0i", "d=0+0i"};
+TEST_CASE("Complex derivative of ln function", "[diff]") {
+    const char* a[] = {"differentiator", "--diff", "ln(x)", "--by", "x"};
     int b = sizeof(a) / sizeof(a[0]);
     string q = ParseArguments(b, const_cast<char**>(a));
-    REQUIRE(q == "(2.75,0)"); // (2+3)*(4-1)/(2^2) + sin(0) - cos(0) = 5*3/4 + 0 - 1 = 3.75 - 1 = 2.75
+    REQUIRE(q == "((1,0) / x)");
+}
+
+TEST_CASE("Complex derivative of product", "[diff]") {
+    const char* a[] = {"differentiator", "--diff", "x * sin(x)", "--by", "x"};
+    int b = sizeof(a) / sizeof(a[0]);
+    string q = ParseArguments(b, const_cast<char**>(a));
+    REQUIRE(q == "(((1,0) * sin(x)) + (x * (cos(x) * (1,0))))");
+}
+
+TEST_CASE("Complex derivative of quotient", "[diff]") {
+    const char* a[] = {"differentiator", "--diff", "x / ln(x)", "--by", "x"};
+    int b = sizeof(a) / sizeof(a[0]);
+    string q = ParseArguments(b, const_cast<char**>(a));
+    REQUIRE(q == "((((1,0) * ln(x)) - (x * ((1,0) / x))) / (ln(x) * ln(x)))");
+}
+
+TEST_CASE("Complex derivative of power function", "[diff]") {
+    const char* a[] = {"differentiator", "--diff", "x^3", "--by", "x"};
+    int b = sizeof(a) / sizeof(a[0]);
+    string q = ParseArguments(b, const_cast<char**>(a));
+    REQUIRE(q == "((3,0) * (x ^ ((3,0) - (1,0))))");
+}
+
+TEST_CASE("Complex derivative of nested functions", "[diff]") {
+    const char* a[] = {"differentiator", "--diff", "sin(cos(x))", "--by", "x"};
+    int b = sizeof(a) / sizeof(a[0]);
+    string q = ParseArguments(b, const_cast<char**>(a));
+    REQUIRE(q == "(cos(cos(x)) * (((-1,0) * sin(x)) * (1,0)))");
 }

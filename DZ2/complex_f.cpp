@@ -40,7 +40,7 @@ string ParseArguments(int argc, char* argv[]) {
             string var = arg.substr(0, eqPos);
             string valueStr = arg.substr(eqPos + 1);
             size_t plusPos = valueStr.find('+');
-            size_t minusPos = valueStr.find('-', 1); 
+            size_t minusPos = valueStr.find('-', 1);
             size_t iPos = valueStr.find('i');
 
             double realPart = 0.0;
