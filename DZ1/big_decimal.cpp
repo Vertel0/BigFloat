@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#pragma GCC optimize ("-O3")
 using namespace std;
 
 vector<char> int_plus(const vector<char>& a, const vector<char>& b){
@@ -252,7 +253,7 @@ vector<char> frac_plus(const vector<char>& a, const vector<char>& b){
                 i++;
                 sgn = 0;
             }
-            while(a[i] != '.'){
+            while(a[i] != '.' && i < a.size()){
                 dig_int.push_back(a[i]-'0');
                 i++;
             }
@@ -262,22 +263,36 @@ vector<char> frac_plus(const vector<char>& a, const vector<char>& b){
                 i++;
             }
             dig2_int = convert_integer(dig_int);
-
-            dig2_frac = convert_frac(dig_frac, after);
+            if(!dig_frac.empty()){
+                dig2_frac = convert_frac(dig_frac, after);
+            }
             for(int i = 0; i < dig2_int.size(); i++){
                 dig.push_back(dig2_int[i]);
             }
             int kk = 1;
             for(int i = 1; i < dig2_frac.size(); i++){
                 if(dig2_frac[i] != 0){
-                    kk = i;
+                    kk = i+1;
                 }
             }
+            if(dig2_frac.size() > 0){
             for(int i = 0; i < kk; i++){
                 dig.push_back(dig2_frac[i]);
             }
+            }else{
+            dig.push_back(0);
+            }
         after = kk;
         before = dig2_int.size();
+        int o = dig.size();
+        for(int i = dig.size()-1; i > before+1; i--){
+            if(dig[i] != 0){
+                o = i;
+                break;
+            }
+        }
+        dig.resize(o+1);
+        after = dig.size() - before;
         int k = 0;
             for(int i = dig.size()-1; i > before;i--){
                 if(dig[i] == 0){
@@ -287,7 +302,7 @@ vector<char> frac_plus(const vector<char>& a, const vector<char>& b){
                 }
             }
             if(k != 0){
-                    after-=k;
+            after-=k;
             vector<char>q;
             for(int i = 0 ; i < dig.size()-k;i++){
                 q.push_back(dig[i]);
@@ -536,75 +551,83 @@ void print(const big_decimal& a){
 
 
 bool operator>(const big_decimal &a, const big_decimal &b){
+    int q = 0;
+    if(a.sgn == 0){
+        q = 1;
+    }
     if(a.sgn < b.sgn){
         return 0;
     }else if(a.sgn > b.sgn){
         return 1;
     }
     if(a.before > b.before){
-        return 1;
+        return (1 + q)%2;
     }else if(a.before < b.before){
-        return 0;
+        return (0 + q)%2;
     }else{
         for(int i = 0; i < min(a.dig.size(), b.dig.size()); i++){
             if(a.dig[i] > b.dig[i]){
-                return 1;
+                return (1 + q)%2;
             }else if(a.dig[i] < b.dig[i]){
-                return 0;
+                return (0 + q)%2;
             }
         }
         if(a.after > b.after){
         for(int i = min(a.dig.size(), b.dig.size()); i < a.dig.size(); i++){
             if(a.dig[i] != 0){
-                return 1;
+                return (1 + q)%2;
             }
         }
     }else if(a.after < b.after){
         for(int i = min(a.dig.size(), b.dig.size()); i < b.dig.size(); i++){
             if(b.dig[i] != 0){
-                return 1;
+                return (1 + q)%2;
             }
         }
     }
     }
-    return 0;
+    return (0 + q)%2;
 }
 
 
 bool operator<(const big_decimal &a, const big_decimal &b){
+    int q = 0;
+    if(a.sgn == 0){
+        q = 1;
+    }
     if(a.sgn < b.sgn){
         return 1;
     }else if(a.sgn > b.sgn){
         return 0;
     }
     if(a.before < b.before){
-        return 1;
+        return (1 + q)%2;
     }else if(a.before < b.before){
-        return 0;
+        return (0 + q)%2;
     }else{
         for(int i = 0; i < min(a.dig.size(), b.dig.size()); i++){
             if(a.dig[i] < b.dig[i]){
-                return 1;
+                return (1 + q)%2;
             }else if(a.dig[i] > b.dig[i]){
-                return 0;
+                return (0 + q)%2;
             }
         }
 
         if(a.after > b.after){
         for(int i = min(a.dig.size(), b.dig.size()); i < a.dig.size(); i++){
             if(a.dig[i] != 0){
-                return 0;
+                return (0 + q)%2;
             }
         }
     }else if(a.after < b.after){
         for(int i = min(a.dig.size(), b.dig.size()); i < b.dig.size(); i++){
             if(b.dig[i] != 0){
-                return 0;
+                return (0 + q)%2;
             }
         }
     }
     }
-    return 1;
+    return (1 + q)%2;
 }
 
 
@@ -1082,4 +1105,5 @@ void pi(int precision) {
     print_pi(pi, precision);
 
 }
+
 
