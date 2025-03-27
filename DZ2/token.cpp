@@ -42,7 +42,13 @@ vector<Token> tokenize(const string& input) {
                 }
             }
         } else if (c == '+' || c == '-' || c == '*' || c == '/' || c == '^') {
-            tokens.push_back(Token(OPERATOR, string(1, c)));
+            if (c == '-' && (tokens.empty() ||
+                tokens.back().type == LEFT_PAREN ||
+                tokens.back().type == OPERATOR)) {
+                tokens.push_back(Token(OPERATOR, "u-")); \
+            } else {
+                tokens.push_back(Token(OPERATOR, string(1, c)));
+            }
             i++;
         } else if (c == '(') {
             tokens.push_back(Token(LEFT_PAREN, "("));

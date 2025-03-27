@@ -14,11 +14,12 @@ shared_ptr<Expression<T>> parseExpression(const vector<Token>& tokens, const vec
     stack<string> operators;
 
     map<string, int> precedence = {
-        {"+", 1}, {"-", 1},
-        {"*", 2}, {"/", 2},
-        {"^", 3},
-        {"sin", 4}, {"cos", 4}, {"ln", 4}, {"exp", 4}
-    };
+    {"+", 1}, {"-", 1},
+    {"u-", 4},
+    {"*", 2}, {"/", 2},
+    {"^", 3},
+    {"sin", 4}, {"cos", 4}, {"ln", 4}, {"exp", 4}
+};
 
     for (const auto& token : tokens) {
         if (token.type == NUMBER) {
@@ -40,6 +41,11 @@ shared_ptr<Expression<T>> parseExpression(const vector<Token>& tokens, const vec
         } else if (token.type == FUNCTION) {
             operators.push(token.value);
         } else if (token.type == OPERATOR) {
+            if (token.value == "u-") {
+                operators.push(token.value);
+                continue;
+            }
+
             while (!operators.empty() && operators.top() != "(" &&
                    precedence[operators.top()] >= precedence[token.value]) {
                 string op = operators.top();
@@ -50,6 +56,13 @@ shared_ptr<Expression<T>> parseExpression(const vector<Token>& tokens, const vec
                     values.pop();
                     functions f = (op == "sin") ? Sin : (op == "cos") ? Cos : (op == "ln") ? Ln : Exp;
                     values.push(make_shared<MonoExpression<T>>(expr, f));
+                } else if (op == "u-") {
+                    auto expr = values.top();
+                    values.pop();
+                    values.push(make_shared<BinaryExpression<T>>(
+                        make_shared<ConstantExpression<T>>(T(-1)),
+                        expr,
+                        Mul));
                 } else {
                     auto right = values.top();
                     values.pop();
@@ -72,6 +85,13 @@ shared_ptr<Expression<T>> parseExpression(const vector<Token>& tokens, const vec
                     values.pop();
                     functions f = (op == "sin") ? Sin : (op == "cos") ? Cos : (op == "ln") ? Ln : Exp;
                     values.push(make_shared<MonoExpression<T>>(expr, f));
+                } else if (op == "u-") {
+                    auto expr = values.top();
+                    values.pop();
+                    values.push(make_shared<BinaryExpression<T>>(
+                        make_shared<ConstantExpression<T>>(T(-1)),
+                        expr,
+                        Mul));
                 } else {
                     auto right = values.top();
                     values.pop();
@@ -98,6 +118,13 @@ shared_ptr<Expression<T>> parseExpression(const vector<Token>& tokens, const vec
             values.pop();
             functions f = (op == "sin") ? Sin : (op == "cos") ? Cos : (op == "ln") ? Ln : Exp;
             values.push(make_shared<MonoExpression<T>>(expr, f));
+        } else if (op == "u-") {
+            auto expr = values.top();
+            values.pop();
+            values.push(make_shared<BinaryExpression<T>>(
+                make_shared<ConstantExpression<T>>(T(-1)),
+                expr,
+                Mul));
         } else {
             auto right = values.top();
             values.pop();
